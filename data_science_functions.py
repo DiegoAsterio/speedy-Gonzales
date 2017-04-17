@@ -389,7 +389,7 @@ class ClassifierBaggingTree(Classifier):
         N = int(LSet.size() * self.pourcentage)
         for _ in range(self.nArbres):
             echantillon = echantillonLS(LSet,N,self.remise)
-            arb_dec = ArbreDecision(0.0)
+            arb_dec = ArbreDecision(self.seuil)
             arb_dec.train(echantillon)
             self.foret.append(arb_dec)
     def predict(self,x):
@@ -399,7 +399,7 @@ class ClassifierBaggingTree(Classifier):
         else:
             return -1
             
-class ClassifierBaggingPerceptron(Classifier):
+class ClassifierOOBPerceptron(Classifier):
 
     def __init__(self,nPercep,pourcentageExemples,seuil,remise):
         self.nPercep = nPercep
@@ -484,3 +484,4 @@ class ClassifierOOBTree(Classifier):
                 return -1
         except RuntimeWarning:
             return 1
+

@@ -124,55 +124,5 @@ def values_in_a_column(column):
 def normalize_data(df):
     N = len(df)
     for i in range(N):
-        if i in [6,10]:
-            df.iloc[i,69:75] = df.iloc[i,69:75]/120
-            df.iloc[i,76:81] = df.iloc[i,76:81] * 0.01666
-            df.iloc[i,81:87] = df.iloc[i,81:87]/120
-        else:
-            df.iloc[i,69:87] = df.iloc[i,69:87] * 0.01
-        df.iloc[i,87:92] = df.iloc[i,87:92] * 0.02
-        df.iloc[i,24:30] = df.iloc[i,24:30] * 0.02
-
-class ClassifierOOBTree(Classifier):
-
-    def __init__(self,nArbres,pourcentageExemples,seuil,remise):
-        self.nArbres = nArbres
-        self.pourcentage = pourcentageExemples
-        self.seuil = seuil
-        self.remise = remise
-        self.foret = dict()
-        self.echantillons = dict()
-        self.sizeForet = 0
-
-    def train(self,LSet):
-        N = int(LSet.size() * self.pourcentage)
-        for _ in range(self.nArbres):
-            echantillon = echantillonLS(LSet,N,self.remise)
-            arb_dec = ArbreDecision(0.0)
-            arb_dec.train(echantillon)
-            self.foret[self.sizeForet] = arb_dec
-            self.echantillons[self.sizeForet] = echantillon
-            self.sizeForet += 1
-
-    def can_vote(self, k, position):
-        echantillon = self.echantillons[k]
-        for x in echantillon.x:
-            foundInEchantillon = True
-            for i in range(len(x)):
-                if x[i] != position[i]:
-                    foundInEchantillon = False
-            if foundInEchantillon:
-                return False
-        return True
-
-    def predict(self,x):
-        right_to_vote = [self.can_vote(key, x) for key in self.echantillons]
-        votes = np.array([self.foret[i].predict(x) for i in range(self.sizeForet) if right_to_vote[i] ])
-        try :
-            if votes.mean() >= 0 :
-                return 1
-            else:
-                return -1
-        except RuntimeWarning:
-            return 1
+        df.iloc[i,69:75] = df.iloc[i,69:75] * 0.01
     
