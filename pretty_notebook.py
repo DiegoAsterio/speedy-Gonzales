@@ -124,5 +124,12 @@ def values_in_a_column(column):
 def normalize_data(df):
     N = len(df)
     for i in range(N):
-        df.iloc[i,69:75] = df.iloc[i,69:75] * 0.01
-    
+        df.iloc[i,24:30] = df.iloc[i,24:30] * 0.1      #The partner thought of the surveyed.
+        df.iloc[i,69:75] = df.iloc[i,69:75] * 0.01     #What the surveyed looks for in the opposite sex.
+        if i in range(5,10):
+            df.iloc[i,75:81] = df.iloc[i,75:81] * 0.1  #What the surveyed thinks others think with his same sexual preference look for
+            df.iloc[i,81:87] = df.iloc[i,81:87] / 20.0 #What the surveyed thinks others think with sexual preference where he fits
+        else:
+            df.iloc[i,75:81] = df.iloc[i,75:81] * 0.01 #What the surveyed thinks others with his same sexual preference look for
+            df.iloc[i,81:87] = df.iloc[i,81:87] * 0.01 #What the surveyed thinks others think with sexual preference where he fits
+

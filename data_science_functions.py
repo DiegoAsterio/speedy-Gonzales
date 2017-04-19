@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from functools import reduce
 import math
+import pandas as pd
 import random
 
 class LabeledSet:
@@ -457,7 +458,7 @@ class ClassifierOOBTree(Classifier):
         N = int(LSet.size() * self.pourcentage)
         for _ in range(self.nArbres):
             echantillon = echantillonLS(LSet,N,self.remise)
-            arb_dec = ArbreDecision(0.0)
+            arb_dec = ArbreDecision(self.seuil)
             arb_dec.train(echantillon)
             self.foret[self.sizeForet] = arb_dec
             self.echantillons[self.sizeForet] = echantillon
@@ -484,4 +485,71 @@ class ClassifierOOBTree(Classifier):
                 return -1
         except RuntimeWarning:
             return 1
+
+def dist_vect(x,y):
+    v = [(i-j)*(i-j) for i,j in np.column_stack([x,y])]
+    return np.sqrt(np.sum(v))
+
+def initialisation(K, df):
+    choice  =  random.sample(range(len(df)),K)
+    return pd.DataFrame(df.iloc[choice])
+
+def inertie_cluster(df):
+    cntr = mon_centroide(df)
+    ret=0
+    for i in range(len(df)):
+        d = dist_vect(cntr,df.iloc[i])
+        ret += d*d
+    return ret
+
+def mon_centroide(m):
+    return m.mean(axis=0)
+
+def plus_proche(ex,centroides):
+    minimum = float('inf')
+    pos = -1
+    for i in range(len(centroides)):
+        d = dist_vect(ex, centroides.iloc[i])
+        if minimum > d:
+            pos = i
+            minimum = d
+    return pos
+
+def affecte_cluster(df,centr):
+    M_affect = dict()
+    for i in range(len(centr)):
+        M_affect[i]=[]
+    for i in range(len(df)):
+        proche =  plus_proche(df.iloc[i],centr)
+        M_affect[proche].append(i)
+    return M_affect
+
+def nouveaux_centroides(df, M):
+    centrs = [mon_centroide(df.iloc[M[i]]) for i in range(len(M))]
+    return pd.DataFrame(centrs)
+
+def inertie_globale(df, M):
+    inrts = 0
+    for i in M:
+        tmp = pd.DataFrame(df.iloc[M[i]])
+        inrts += inertie_cluster(tmp)
+    return inrts
+
+def kmoyennes(K, df, eps, iter_max, verbose=False):
+    diff = float('inf')
+    Centroides = initialisation(K, df)
+    M = affecte_cluster(df, Centroides)
+    prev_inert = inertie_globale(df,M)
+    while iter_max and diff>eps:
+        Centroides = nouveaux_centroides(df,M)
+        M = affecte_cluster(df, Centroides)
+        nouv_inert = inertie_globale(df,M)
+        diff = abs(nouv_inert - prev_inert)
+        
+        if verbose:
+            print ("Inertie: %f Difference: %f "% (nouv_inert, diff))
+
+        prev_inert = nouv_inert
+        iter_max -= 1
+    return Centroides, M
 
